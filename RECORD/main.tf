@@ -9,20 +9,20 @@ terraform {
 }
 
 data "cloudflare_zone" "ZONE" {
-    count = (length("${var.DNSs.RECORDs}") > 0 ?
-            length("${var.DNSs.RECORDs}") : 0)
-    zone_name = "${var.DNSs.RECORDs[count.index].DOMAIN}"
+    count = (length("${var.RECORDs}") > 0 ?
+            length("${var.RECORDs}") : 0)
+    name = "${var.RECORDs[count.index].DOMAIN}"
 }
 
 resource "cloudflare_record" "ADD_RECORD" {
-    count = (length("${var.DNSs.RECORDs}") > 0 ?
-            length("${var.DNSs.RECORDs}") : 0)
+    count = (length("${var.RECORDs}") > 0 ?
+            length("${var.RECORDs}") : 0)
 
     zone_id = "${cloudflare_zone.ZONE[count.index].ID}"
-    name    = "${var.DNSs.RECORDs[count.index].NAME}"
-    type    = "${var.DNSs.RECORDs[count.index].TYPE}"
-    value   = "${var.DNSs.RECORDs[count.index].VALUE}"
-    ttl     = "${var.DNSs.RECORDs[count.index].TTL}"
+    name    = "${var.RECORDs[count.index].NAME}"
+    type    = "${var.RECORDs[count.index].TYPE}"
+    value   = "${var.RECORDs[count.index].VALUE}"
+    ttl     = "${var.RECORDs[count.index].TTL}"
 }
 
 resource "null_resource" "WAIT_RECORD_STATUS" {
@@ -30,10 +30,10 @@ resource "null_resource" "WAIT_RECORD_STATUS" {
 
     provisioner "local-exec" {
         command = <<-EOF
-        EXPECTED_RECORD="${var.DNSs.RECORDs[count.index].VALUE}"
+        EXPECTED_RECORD="${var.RECORDs[count.index].VALUE}"
 
         while : ; do
-            REGISTERED_RECORD="$(dig +short "${var.DNSs.RECORDs[count.index].NAME}.${var.DNSs.RECORDs[count.index].DOMAIN}" "${var.DNSs.RECORDs[count.index].TYPE}")"
+            REGISTERED_RECORD="$(dig +short "${var.RECORDs[count.index].NAME}.${var.RECORDs[count.index].DOMAIN}" "${var.RECORDs[count.index].TYPE}")"
             EXPECTED_RECORD_EXISTS=true
 
             if [[ "$REGISTERED_RECORD" != *"$EXPECTED_RECORD"* ]]; then
