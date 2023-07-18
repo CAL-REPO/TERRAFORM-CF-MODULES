@@ -47,6 +47,7 @@ resource "null_resource" "WAIT_RECORD_STATUS" {
                 echo "Record is activated"
                 break
             else
+                echo "Record is not activated yet"
                 sleep 5
             fi
         done
