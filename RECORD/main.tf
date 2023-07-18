@@ -1,3 +1,5 @@
+provider "cloudflare" {}
+
 resource "cloudflare_record" "ADD_RECORD" {
     count = (length(local.RECORD) > 0 ?
             length(local.RECORD) : 0)
