@@ -18,7 +18,7 @@ resource "cloudflare_record" "ADD_RECORD" {
     count = (length("${var.RECORDs}") > 0 ?
             length("${var.RECORDs}") : 0)
 
-    zone_id = "${cloudflare_zone.ZONE[count.index].ID}"
+    zone_id = "${data.cloudflare_zone.ZONE[count.index].ID}"
     name    = "${var.RECORDs[count.index].NAME}"
     type    = "${var.RECORDs[count.index].TYPE}"
     value   = "${var.RECORDs[count.index].VALUE}"
