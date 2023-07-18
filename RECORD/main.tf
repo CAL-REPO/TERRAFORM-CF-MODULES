@@ -8,13 +8,47 @@ terraform {
     }
 }
 
-resource "cloudflare_record" "ADD_RECORD" {
-    count = (length(var.RECORD) > 0 ?
-            length(var.RECORD) : 0)
-
-    zone_id = "${var.RECORD[count.index].ZONE_ID}"
-    name    = "${var.RECORD[count.index].NAME}"
-    type    = "${var.RECORD[count.index].TYPE}"
-    value   = "${var.RECORD[count.index].VALUE}"
-    ttl     = "${var.RECORD[count.index].TTL}"
+data "cloudflare_zone" "ZONE" {
+    count = ("${var.DNSs.DOMAIN}" != "" ? 1 : 0)
+    zone_name = "${var.DNSs.DOMAIN}"
 }
+
+resource "cloudflare_record" "ADD_RECORD" {
+    count = ("${var.DNSs.DOMAIN}" != "" && length("${var.DNSs.RECORDs}") > 0 ?
+            length("${var.DNSs.RECORDs}") : 0)
+
+    zone_id = "${cloudflare_zone.ZONE.ID}"
+    name    = "${var.DNSs.RECORDs[count.index].NAME}"
+    type    = "${var.DNSs.RECORDs[count.index].TYPE}"
+    value   = "${var.DNSs.RECORDs[count.index].VALUE}"
+    ttl     = "${var.DNSs.RECORDs[count.index].TTL}"
+}
+
+resource "null_resource" "WAIT_RECORD_STATUS" {
+    depends_on = [ cloudflare_record.ADD_RECORD ]
+
+    provisioner "local-exec" {
+        command = <<-EOF
+        EXPECTED_RECORD="${var.DNSs.RECORDs[count.index].VALUE}"
+
+        while : ; do
+            REGISTERED_RECORD="$(dig +short "${var.DNSs.RECORDs[count.index].NAME}.${var.DNSs.DOMAIN}" "${var.DNSs.RECORDs[count.index].TYPE}")"
+            EXPECTED_RECORD_EXISTS=true
+
+            if [[ "$REGISTERED_RECORD" != *"$EXPECTED_RECORD"* ]]; then
+                EXPECTED_RECORD_EXISTS=false
+                break
+            fi
+
+            if $EXPECTED_RECORD_EXISTS = true; then
+                echo "Record is activated"
+                break
+            else
+                sleep 5
+            fi
+        done
+        EOF
+        interpreter = ["bash", "-c"]
+    }
+}
+
