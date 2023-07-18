@@ -1,4 +1,12 @@
-provider "cloudflare" {}
+terraform {
+    required_version = ">= 1.0"
+    required_providers {
+        cloudflare = {
+            source  = "cloudflare/cloudflare"
+            version = "~> 4.0"
+        }
+    }
+}
 
 resource "cloudflare_record" "ADD_RECORD" {
     count = (length(local.RECORD) > 0 ?
