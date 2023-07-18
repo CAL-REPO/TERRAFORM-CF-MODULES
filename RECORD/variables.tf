@@ -4,7 +4,7 @@ variable "DOMAINs" {
 }
 
 variable "DNSs" {
-    type = list(object({
+    type = list({
         RECORDs = list(object({
             DOMAIN = string
             NAME = string
@@ -12,7 +12,7 @@ variable "DNSs" {
             VALUE = string
             TTL = string
         }))
-    }))
+    })
     default = {
         RECORDs = []
     }
