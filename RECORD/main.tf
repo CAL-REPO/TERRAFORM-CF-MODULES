@@ -26,6 +26,8 @@ resource "cloudflare_record" "ADD_RECORD" {
 }
 
 resource "null_resource" "WAIT_RECORD_STATUS" {
+    count = (length("${var.RECORDs}") > 0 ?
+            length("${var.RECORDs}") : 0)    
     depends_on = [ cloudflare_record.ADD_RECORD ]
 
     provisioner "local-exec" {
