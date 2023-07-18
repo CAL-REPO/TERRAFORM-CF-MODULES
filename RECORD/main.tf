@@ -33,7 +33,7 @@ resource "null_resource" "WAIT_RECORD_STATUS" {
         EXPECTED_RECORD="${var.DNSs.RECORDs[count.index].VALUE}"
 
         while : ; do
-            REGISTERED_RECORD="$(dig +short "${var.DNSs.RECORDs[count.index].NAME}.${var.DNSs.DOMAIN}" "${var.DNSs.RECORDs[count.index].TYPE}")"
+            REGISTERED_RECORD="$(dig +short "${var.DNSs.RECORDs[count.index].NAME}.${var.DNSs.RECORDs[count.index].DOMAIN}" "${var.DNSs.RECORDs[count.index].TYPE}")"
             EXPECTED_RECORD_EXISTS=true
 
             if [[ "$REGISTERED_RECORD" != *"$EXPECTED_RECORD"* ]]; then
