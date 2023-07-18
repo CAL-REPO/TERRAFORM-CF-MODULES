@@ -9,15 +9,16 @@ terraform {
 }
 
 data "cloudflare_zone" "ZONE" {
-    count = ("${var.DNSs.DOMAIN}" != "" ? 1 : 0)
-    zone_name = "${var.DNSs.DOMAIN}"
+    count = (length("${var.DNSs.RECORDs}") > 0 ?
+            length("${var.DNSs.RECORDs}") : 0)
+    zone_name = "${var.DNSs.RECORDs[count.index].DOMAIN}"
 }
 
 resource "cloudflare_record" "ADD_RECORD" {
-    count = ("${var.DNSs.DOMAIN}" != "" && length("${var.DNSs.RECORDs}") > 0 ?
+    count = (length("${var.DNSs.RECORDs}") > 0 ?
             length("${var.DNSs.RECORDs}") : 0)
 
-    zone_id = "${cloudflare_zone.ZONE.ID}"
+    zone_id = "${cloudflare_zone.ZONE[count.index].ID}"
     name    = "${var.DNSs.RECORDs[count.index].NAME}"
     type    = "${var.DNSs.RECORDs[count.index].TYPE}"
     value   = "${var.DNSs.RECORDs[count.index].VALUE}"
